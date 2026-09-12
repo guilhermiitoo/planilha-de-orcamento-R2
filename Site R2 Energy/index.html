@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>R2 Energy · Energia solar de alta performance</title>
+  <meta name="description" content="R2 Energy — projetos fotovoltaicos residenciais e corporativos com engenharia própria, alta performance e monitoramento em tempo real.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700&family=Tektur:wght@500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <a class="skip" href="#main">Pular para o conteúdo</a>
+
+  <!-- ================= CABEÇALHO FIXO ================= -->
+  <header class="header" id="header">
+    <a class="logo" href="#top" aria-label="R2 Energy — início">
+      <span class="logo-mark" aria-hidden="true"></span>
+      <span class="logo-text">R2 <em>Energy</em></span>
+    </a>
+    <nav class="nav" id="nav" aria-label="Navegação principal"></nav>
+    <button class="btn btn-primary btn-sim" id="btnSimHeader" type="button">Simular Orçamento</button>
+    <button class="menu-toggle" id="menuToggle" type="button" aria-label="Abrir menu" aria-expanded="false">
+      <span></span><span></span><span></span>
+    </button>
+  </header>
+
+  <main id="main">
+    <!-- ================= HERO ================= -->
+    <section class="hero" id="top">
+      <div class="hero-inner">
+        <span class="tag" id="heroTag"></span>
+        <h1 class="hero-title" id="heroTitle"></h1>
+        <p class="hero-sub" id="heroSub"></p>
+        <div class="hero-actions">
+          <button class="btn btn-primary btn-lg" id="btnSimHero" type="button"></button>
+          <a class="btn btn-ghost btn-lg" id="btnVerInstalacao" href="#residencial"></a>
+        </div>
+        <ul class="hero-numbers" id="heroNumbers"></ul>
+      </div>
+      <div class="hero-visual" aria-hidden="true">
+        <div class="sun-ring"></div>
+        <div class="panel-hero">
+          <div class="panel-cells"></div>
+        </div>
+      </div>
+      <div class="scroll-hint" aria-hidden="true"><span></span>Role para ver a instalação</div>
+    </section>
+
+    <!-- ================= JORNADAS (geradas pelo app.js) ================= -->
+    <div id="jornadas"></div>
+
+    <!-- ================= CONTATO / RODAPÉ ================= -->
+    <section class="contato" id="contato">
+      <div class="contato-inner">
+        <span class="tag">Fale com a R2 Energy</span>
+        <h2>Pronto para reduzir sua conta de energia?</h2>
+        <p>Faça uma simulação rápida ou fale diretamente com um consultor.</p>
+        <div class="hero-actions">
+          <button class="btn btn-primary btn-lg" id="btnSimContato" type="button">Simular Orçamento</button>
+          <a class="btn btn-ghost btn-lg" id="btnWhatsContato" href="#" target="_blank" rel="noopener">WhatsApp</a>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+      <div>
+        <div class="logo-text">R2 <em>Energy</em></div>
+        <p class="footer-desc" id="footerDesc"></p>
+      </div>
+      <div class="footer-col">
+        <span class="footer-label">Contato corporativo</span>
+        <a id="footerFone" href="#"></a>
+        <a id="footerMail" href="#"></a>
+        <span id="footerEnd"></span>
+      </div>
+      <div class="footer-col">
+        <span class="footer-label">Dados da empresa</span>
+        <span>CNPJ <strong id="footerCnpj"></strong></span>
+        <span id="footerCred"></span>
+      </div>
+    </div>
+  </footer>
+
+  <!-- ================= MODAL DO SIMULADOR ================= -->
+  <dialog class="modal" id="simModal" aria-labelledby="simTitulo">
+    <div class="modal-box">
+      <button class="modal-close" id="simClose" type="button" aria-label="Fechar simulador">×</button>
+
+      <!-- Passo 1: entrada -->
+      <div class="sim-step" id="simStepInput">
+        <span class="tag">Simulador</span>
+        <h2 id="simTitulo"></h2>
+        <p class="muted" id="simSub"></p>
+
+        <div class="seg" role="radiogroup" aria-label="Tipo de entrada">
+          <button class="seg-btn is-active" type="button" data-modo="reais" role="radio" aria-checked="true">Valor da conta (R$)</button>
+          <button class="seg-btn" type="button" data-modo="kwh" role="radio" aria-checked="false">Consumo (kWh/mês)</button>
+        </div>
+
+        <label class="field">
+          <span id="simLabel">Valor médio da conta de energia</span>
+          <div class="input-wrap">
+            <span class="input-prefix" id="simPrefix">R$</span>
+            <input type="number" id="simValor" min="1" step="1" placeholder="Ex.: 450" inputmode="decimal">
+          </div>
+          <small class="muted" id="simDica">Use a média dos últimos 12 meses para um resultado mais preciso.</small>
+        </label>
+
+        <div class="loc-box" id="locBox">
+          <span class="loc-dot" aria-hidden="true"></span>
+          <span id="locTexto">Detectando sua localização…</span>
+        </div>
+
+        <button class="btn btn-primary btn-lg btn-block" id="simCalcular" type="button">Calcular meu sistema</button>
+      </div>
+
+      <!-- Passo 2: resultado -->
+      <div class="sim-step is-hidden" id="simStepResult">
+        <span class="tag">Resultado da simulação</span>
+        <h2>Seu sistema recomendado</h2>
+        <p class="muted" id="resResumo"></p>
+
+        <div class="cards" id="resCards"></div>
+
+        <div class="nota" id="resNota"></div>
+
+        <a class="btn btn-primary btn-lg btn-block btn-whats" id="resWhats" href="#" target="_blank" rel="noopener"></a>
+        <button class="btn btn-ghost btn-block" id="resRefazer" type="button">Refazer simulação</button>
+      </div>
+    </div>
+  </dialog>
+
+  <script src="content.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
