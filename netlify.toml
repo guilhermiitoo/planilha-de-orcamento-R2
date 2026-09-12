@@ -1,0 +1,9 @@
+# Configuração do Netlify — site estático, sem build
+[build]
+  publish = "."
+  command = ""
+
+[[headers]]
+  for = "/assets/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
