@@ -43,6 +43,7 @@ window.Scene = (function () {
         <div class="cena-veu"></div>
         <div class="cena-vinheta"></div>
       </div>`;
+    this.cena = container.querySelector(".cena");
     this.cam = container.querySelector(".cena-cam");
     this.telaQuadros = container.querySelector(".cena-quadros");
     this.imgs = [...container.querySelectorAll(".cena-img")];
@@ -101,36 +102,101 @@ window.Scene = (function () {
     tentar(0);
   };
 
+  /* Carrega em DUAS ONDAS, para o site não ficar parado esperando os ~8 MB:
+
+     1ª onda — uma AMOSTRA de quadros espalhados por todo o vídeo (do 1 ao
+       último, de tantos em tantos). Assim que ela chega, o modo vídeo já
+       liga: a cena inteira funciona de ponta a ponta, só que "picotada".
+     2ª onda — todos os outros, em segundo plano. Cada quadro entra na cena
+       assim que chega e o movimento vai ficando fluido sozinho.
+
+     Enquanto um quadro ainda não chegou, mostramos o mais próximo que já
+     está pronto. Se a AMOSTRA falhar, é sinal de que o padrão de nome está
+     errado — aí sim voltamos a tentar o próximo padrão (aoFalhar).      */
   Scene.prototype.carregarTodos = function (q, nome, aoFalhar) {
-    const total = q.total, imgs = new Array(total);
-    let prontos = 0, falhou = false;
-    for (let i = 1; i <= total; i++) {
+    const total = q.total;
+    const alvoAmostra = Math.min(total, Math.max(2, q.loteInicial || 20));
+    // índices espalhados por igual, sempre incluindo o primeiro e o último
+    const passo = (total - 1) / (alvoAmostra - 1);
+    const amostra = [...new Set(Array.from({ length: alvoAmostra },
+      (_, k) => Math.round(1 + k * passo)))];
+    const naAmostra = new Set(amostra);
+
+    const imgs = new Array(total), prontos = new Array(total).fill(false);
+    let faltam = amostra.length, falhou = false, ativado = false, completos = 0;
+
+    const criar = (i, primeiraOnda) => {
       const im = new Image();
       im.decoding = "async";
-      im.src = q.pasta + encodeURIComponent(nome(i)).replace(/%2F/g, "/");
-      im.onload = () => { if (++prontos === total && !falhou) this.ativarQuadros(imgs); };
-      im.onerror = () => {
-        if (!falhou) { falhou = true; console.warn("[R2] Faltou o quadro: " + im.src); aoFalhar(); }
+      im.onload = () => {
+        prontos[i - 1] = true;
+        completos++;
+        if (ativado) this.acrescentarQuadro(i - 1);
+        if (primeiraOnda && !falhou && --faltam === 0) {
+          ativado = true;
+          this.ativarQuadros(imgs, prontos);
+          segundaOnda();
+        }
+        if (completos === total) {
+          console.info("[R2] Modo vídeo ativo: " + total + " quadros carregados.");
+        }
       };
+      im.onerror = () => {
+        if (primeiraOnda) {
+          if (falhou) return;
+          falhou = true;
+          console.warn("[R2] Faltou o quadro: " + im.src);
+          aoFalhar();
+        } else {
+          console.warn("[R2] Quadro não carregado, a cena segue sem ele: " + im.src);
+        }
+      };
+      im.src = q.pasta + encodeURIComponent(nome(i)).replace(/%2F/g, "/");
       imgs[i - 1] = im;
-    }
+    };
+
+    const segundaOnda = () => {
+      for (let i = 1; i <= total; i++) if (!naAmostra.has(i)) criar(i, false);
+    };
+
+    amostra.forEach((i) => criar(i, true));
   };
+
   /* As imagens já carregadas são colocadas empilhadas na tela e apenas uma
      fica visível por vez. Sem canvas: funciona igual abrindo o index.html
      por duplo clique (file://) ou por um servidor.                      */
-  Scene.prototype.ativarQuadros = function (imgs) {
+  Scene.prototype.ativarQuadros = function (imgs, prontos) {
     this.quadros = imgs;
-    imgs.forEach((im) => { im.className = "quadro"; this.telaQuadros.appendChild(im); });
-    this.el.classList.add("tem-quadros");
+    this.prontos = prontos;
     this.ultimo = -1;
-    this.desenharQuadro(this._p || 0);
+    this.cena.classList.add("tem-quadros");
+    imgs.forEach((im, i) => { if (prontos[i]) this.acrescentarQuadro(i); });
     this.update(this._p || 0);
-    console.info("[R2] Modo vídeo ativo: " + imgs.length + " quadros carregados.");
+    console.info("[R2] Modo vídeo ativo com " + this.telaQuadros.children.length +
+      " de " + imgs.length + " quadros — o restante entra em segundo plano.");
   };
+
+  // coloca na tela um quadro que acabou de chegar e reavalia o quadro exibido
+  Scene.prototype.acrescentarQuadro = function (i) {
+    const im = this.quadros[i];
+    if (!im || im.parentNode) return;
+    im.className = "quadro";
+    this.telaQuadros.appendChild(im);
+    this.desenharQuadro(this._p || 0);
+  };
+
+  // o quadro certo para esta posição do scroll; se ainda não chegou, o
+  // mais próximo que já estiver pronto
   Scene.prototype.desenharQuadro = function (p) {
     const n = this.quadros.length;
-    const i = Math.min(n - 1, Math.max(0, Math.round(p * (n - 1))));
-    if (i === this.ultimo) return;
+    const alvo = Math.min(n - 1, Math.max(0, Math.round(p * (n - 1))));
+    let i = -1;
+    if (this.prontos[alvo]) i = alvo;
+    else for (let d = 1; d < n && i < 0; d++) {
+      if (alvo - d >= 0 && this.prontos[alvo - d]) i = alvo - d;
+      else if (alvo + d < n && this.prontos[alvo + d]) i = alvo + d;
+    }
+    if (i < 0 || i === this.ultimo) return;
     if (this.ultimo >= 0) this.quadros[this.ultimo].classList.remove("is-on");
     this.quadros[i].classList.add("is-on");
     this.ultimo = i;
