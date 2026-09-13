@@ -33,7 +33,29 @@ window.CONTENT = {
       { valor: "25", sufixo: "anos", rotulo: "garantia de performance" },
       { valor: "620", sufixo: "W",   rotulo: "módulos de última geração" },
       { valor: "90", sufixo: "%",    rotulo: "de economia média na conta" }
-    ]
+    ],
+
+    /* ---------- VÍDEO DE FUNDO DA ABERTURA ----------
+       Coloque o arquivo em assets/hero/ com o nome abaixo e ele aparece
+       sozinho, rodando em loop e sem som. Enquanto o arquivo não existir,
+       a abertura fica branca como está hoje — nada quebra.
+
+       ativo      — false desliga o vídeo sem apagar nada.
+       arquivo    — caminho do vídeo (.mp4).
+       poster     — imagem exibida no primeiro instante, antes do vídeo
+                    começar. Opcional: deixe "" para não usar.
+       veu        — a "névoa" por cima do vídeo, de 0 a 1. Quanto maior,
+                    mais apagado o vídeo e mais legível o texto.
+                    0.72 é um bom ponto de partida.
+       textoClaro — false: véu branco, textos escuros (visual de hoje).
+                    true:  véu escuro, textos brancos (visual cinema). */
+    video: {
+      ativo: true,
+      arquivo: "assets/hero/hero.mp4",
+      poster: "assets/hero/hero-poster.jpg",
+      veu: 0.72,
+      textoClaro: false
+    }
   },
 
   /* ---------- SIMULADOR ---------- */

@@ -33,6 +33,49 @@
   const whatsLink = (msg) => `https://wa.me/${C.empresa.whatsapp}?text=${encodeURIComponent(msg)}`;
 
   /* =========================== 2) RENDER ESTÁTICO =========================== */
+  /* ---------------------------------------------------------------
+     Vídeo de fundo da abertura. Montado a partir de C.hero.video.
+     Roda em loop, sem som e sem controles. Se o arquivo não existir,
+     o vídeo se remove sozinho e a abertura volta a ser a de hoje —
+     por isso dá para preparar o site antes de ter o arquivo.
+     --------------------------------------------------------------- */
+  function montarVideoHero() {
+    const v = C.hero && C.hero.video;
+    const caixa = $("#heroVideo");
+    if (!caixa) return;
+    if (!v || !v.ativo || !v.arquivo) { caixa.remove(); return; }
+
+    const hero = $(".hero");
+    hero.style.setProperty("--hero-veu", v.veu != null ? v.veu : 0.72);
+    if (v.textoClaro) hero.classList.add("video-claro");
+
+    const el = document.createElement("video");
+    el.src = v.arquivo;
+    if (v.poster) el.poster = v.poster;
+    el.muted = true;          // sem som: exigido para tocar sozinho
+    el.defaultMuted = true;
+    el.loop = true;
+    el.playsInline = true;    // no iPhone, não abre em tela cheia
+    el.autoplay = !reduceMotion;
+    el.preload = "auto";
+    el.setAttribute("aria-hidden", "true");
+    el.tabIndex = -1;
+
+    // arquivo ausente ou formato não suportado: desfaz tudo, sem quebrar
+    el.addEventListener("error", () => {
+      caixa.remove();
+      hero.classList.remove("video-claro", "tem-video");
+      console.warn("[R2] Vídeo da abertura não carregou (" + v.arquivo +
+        "). A abertura segue sem vídeo. Confira o nome do arquivo em content.js.");
+    });
+    el.addEventListener("loadeddata", () => hero.classList.add("tem-video"));
+
+    caixa.appendChild(el);
+    // alguns navegadores recusam o autoplay na primeira tentativa
+    const tocar = () => { const p = el.play(); if (p) p.catch(() => {}); };
+    if (!reduceMotion) { tocar(); document.addEventListener("click", tocar, { once: true }); }
+  }
+
   function renderStatic() {
     // navegação
     const nav = $("#nav");
@@ -52,6 +95,7 @@
     $("#btnVerInstalacao").textContent = C.hero.ctaSecundario;
     $("#heroNumbers").innerHTML = C.hero.numeros
       .map((n) => `<li><b>${n.valor}<small>${n.sufixo}</small></b><span>${n.rotulo}</span></li>`).join("");
+    montarVideoHero();
 
     // contato + rodapé
     const e = C.empresa;

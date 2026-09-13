@@ -87,7 +87,36 @@ button { font: inherit; cursor: pointer; }
   min-height: 100vh; display: grid; grid-template-columns: 1.1fr .9fr; align-items: center; gap: 40px;
   padding: calc(var(--header-h) + 40px) clamp(20px, 5vw, 64px) 60px; position: relative; overflow: hidden;
 }
-.hero-inner { max-width: 620px; }
+.hero-inner { max-width: 620px; position: relative; z-index: 2; }
+
+/* ---- vídeo de fundo da abertura ----
+   Cobre a seção inteira. O "véu" por cima mantém o texto legível; a
+   força dele vem de --hero-veu, definido em content.js (hero.video.veu). */
+.hero-video { position: absolute; inset: 0; z-index: 0; overflow: hidden; background: var(--bg); }
+.hero-video video { width: 100%; height: 100%; object-fit: cover; display: block; }
+/* o véu só existe quando há vídeo de fato na tela */
+.hero.tem-video .hero-video::after {
+  content: ""; position: absolute; inset: 0; pointer-events: none;
+  background: linear-gradient(100deg,
+    rgba(255,255,255, var(--hero-veu, .72)) 0%,
+    rgba(255,255,255, calc(var(--hero-veu, .72) * .92)) 46%,
+    rgba(255,255,255, calc(var(--hero-veu, .72) * .55)) 100%);
+}
+/* variante cinema: véu escuro e textos claros */
+.hero.video-claro.tem-video .hero-video::after {
+  background: linear-gradient(100deg,
+    rgba(9,14,30, var(--hero-veu, .72)) 0%,
+    rgba(9,14,30, calc(var(--hero-veu, .72) * .92)) 46%,
+    rgba(9,14,30, calc(var(--hero-veu, .72) * .55)) 100%);
+}
+.hero.video-claro.tem-video .hero-title,
+.hero.video-claro.tem-video .hero-numbers b { color: #FFFFFF; }
+.hero.video-claro.tem-video .hero-sub,
+.hero.video-claro.tem-video .hero-numbers span { color: rgba(255,255,255,.82); }
+.hero.video-claro.tem-video .tag { color: #FFFFFF; border-color: rgba(255,255,255,.35); background: rgba(255,255,255,.10); }
+.hero.video-claro.tem-video .btn-ghost { color: #FFFFFF; border-color: rgba(255,255,255,.45); background: rgba(255,255,255,.08); }
+
+@media (prefers-reduced-motion: reduce) { .hero-video video { display: none; } }
 .hero-title { font-size: clamp(38px, 5.4vw, 68px); line-height: 1.02; font-weight: 800; margin: 22px 0 20px; }
 .hero-sub { font-size: clamp(16px, 1.4vw, 19px); color: var(--muted); max-width: 520px; }
 .hero-actions { display: flex; flex-wrap: wrap; gap: 14px; margin-top: 32px; }

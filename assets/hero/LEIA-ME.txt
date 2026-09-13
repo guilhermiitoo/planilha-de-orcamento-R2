@@ -1,0 +1,38 @@
+PASTA DO VIDEO DA ABERTURA (HERO)
+=================================
+
+Coloque aqui DOIS arquivos, com estes nomes exatos:
+
+  hero.mp4          -> o video (obrigatorio)
+  hero-poster.jpg   -> uma foto do primeiro quadro (opcional, recomendado)
+
+O poster e a imagem que aparece no instante em que a pagina abre, antes
+do video comecar a tocar. Sem ele, a abertura pisca branco por um momento.
+
+RECEITA DO VIDEO
+----------------
+  Formato ........ MP4 (codec H.264 / AAC)
+  Resolucao ...... 1920x1080 (Full HD). Nao use 4K: pesa demais e a tela
+                   nao mostra a diferenca.
+  Duracao ........ 8 a 15 segundos. Ele roda em loop.
+  Peso ........... ate 5 MB. Acima disso o site demora a abrir.
+  Som ............ o video toca MUDO no site (exigencia dos navegadores).
+                   Pode deixar o audio no arquivo, ninguem vai ouvir.
+  Enquadramento .. o video e cortado para preencher a tela. O miolo da
+                   imagem e o que aparece; nao coloque nada importante
+                   nas bordas.
+
+AJUSTES (em content.js, bloco hero.video)
+-----------------------------------------
+  ativo ....... false desliga o video sem apagar nada.
+  veu ......... de 0 a 1. E a "nevoa" branca por cima do video.
+                Menor = video mais visivel. Maior = texto mais legivel.
+                Comece em 0.72 e va baixando ate achar o ponto.
+  textoClaro .. true troca para veu escuro e textos brancos (visual
+                cinema). Use se o seu video for escuro.
+
+SE O VIDEO NAO APARECER
+-----------------------
+Abra o site, aperte F12, aba Console. Se estiver escrito
+"[R2] Video da abertura nao carregou", o nome do arquivo esta diferente
+do que esta no content.js. Confira maiusculas e minusculas.
