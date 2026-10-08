@@ -1,0 +1,40 @@
+LOGOTIPO DA R2 ENERGY
+=====================
+
+O SIMBOLO
+  O sol nascendo atras de um painel solar. Branco sobre um degrade de
+  azul ceu. Feito para ser lido ate no tamanho minusculo da lista de
+  conversas do WhatsApp.
+
+OS ARQUIVOS
+  r2-perfil-whatsapp.png .. FOTO DE PERFIL do WhatsApp e do Instagram.
+                            Quadrado de 1024px; o WhatsApp corta em circulo
+                            e o simbolo ja esta dentro da area segura.
+  r2-logo.svg / .png ...... logotipo completo para fundo claro (site,
+                            proposta, papel timbrado).
+  r2-logo-branco.svg/.png . logotipo completo para fundo azul ou escuro
+                            (camiseta, adesivo do carro, stories).
+  r2-icone.svg ............ so o simbolo, com o quadrado de cantos
+                            arredondados. E o icone da aba do navegador.
+  r2-icone-512.png ........ o mesmo, em imagem.
+  apple-touch-icon.png .... icone que aparece quando alguem salva o site
+                            na tela de inicio do iPhone.
+
+  SVG e o formato "infinito": pode ampliar para fachada ou outdoor sem
+  perder qualidade. Mande o SVG para grafica, nao o PNG.
+
+AS CORES
+  Azul ceu claro ... #38BDF8
+  Azul R2 .......... #0A78C2   (cor principal, botoes do site)
+  Azul profundo .... #075A93
+  Grafite .......... #1D1D1F   (o "R2" no fundo claro)
+
+A LETRA
+  Inter (Bold e ExtraBold), fonte livre (SIL Open Font License), liberada
+  para uso comercial. As letras ja estao convertidas em desenho dentro
+  dos arquivos, entao aparecem iguais em qualquer aparelho.
+
+COMO TROCAR A FOTO DO WHATSAPP
+  WhatsApp Business: Ferramentas comerciais > Perfil comercial > toque
+  na foto > Galeria > escolha r2-perfil-whatsapp.png.
+  WhatsApp comum: Configuracoes > toque na sua foto > Editar.
