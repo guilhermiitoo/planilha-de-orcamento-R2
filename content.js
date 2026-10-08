@@ -1,7 +1,7 @@
 /* =====================================================================
    R2 ENERGY — content.js
    TODO texto, número e caminho de arquivo do site vive aqui.
-   Para trocar um texto, uma cor de destaque ou o número de quadros,
+   Para trocar um texto, uma mensagem de WhatsApp ou um número,
    edite este arquivo — não é preciso mexer no index.html nem no app.js.
    ===================================================================== */
 window.CONTENT = {
@@ -16,19 +16,30 @@ window.CONTENT = {
     ano: 2026
   },
 
+  /* ---------- WHATSAPP: o que chega para o vendedor ----------
+     Todo botão de orçamento abre o WhatsApp com uma destas mensagens já
+     escrita. Quando o cliente chega por um anúncio (o link traz fbclid ou
+     utm_source), o site acrescenta "origemAnuncio" no fim — assim o
+     vendedor sabe que o contato veio do Instagram. */
+  whatsapp: {
+    mensagemPadrao: "Olá, R2 Energy! Quero um orçamento de energia solar.",
+    origemAnuncio: "(Vim pelo anúncio do Instagram.)"
+  },
+
   nav: [
     { rotulo: "Residencial",   alvo: "#residencial" },
-    { rotulo: "Resultados",    alvo: "#prova" },
+    { rotulo: "Diferenciais",  alvo: "#prova" },
     { rotulo: "Como funciona", alvo: "#processo" },
     { rotulo: "Dúvidas",       alvo: "#faq" }
   ],
+  ctaCabecalho: "Pedir orçamento",       // botão do topo, sempre visível
 
   hero: {
     tag: "Instalações de alta performance",
     titulo: "Sua energia,<br>sob o seu controle.",
     subtitulo: "Projetos fotovoltaicos dimensionados por engenharia, instalados com precisão e monitorados em tempo real.",
-    ctaPrimario: "Simular Orçamento",
-    ctaSecundario: "Ver a instalação",
+    ctaPrimario: "Pedir orçamento",       // abre o WhatsApp
+    ctaSecundario: "Simular economia",    // abre o simulador
     numeros: [
       { valor: "25", sufixo: "anos", rotulo: "garantia de performance" },
       { valor: "620", sufixo: "W",   rotulo: "módulos de última geração" },
@@ -38,7 +49,7 @@ window.CONTENT = {
     /* ---------- VÍDEO DE FUNDO DA ABERTURA ----------
        Coloque o arquivo em assets/hero/ com o nome abaixo e ele aparece
        sozinho, rodando em loop e sem som. Enquanto o arquivo não existir,
-       a abertura fica branca como está hoje — nada quebra.
+       a abertura fica sem vídeo — nada quebra.
 
        ativo      — false desliga o vídeo sem apagar nada.
        arquivo    — caminho do vídeo (.mp4).
@@ -46,9 +57,8 @@ window.CONTENT = {
                     começar. Opcional: deixe "" para não usar.
        veu        — a "névoa" por cima do vídeo, de 0 a 1. Quanto maior,
                     mais apagado o vídeo e mais legível o texto.
-                    0.72 é um bom ponto de partida.
-       textoClaro — false: véu branco, textos escuros (visual de hoje).
-                    true:  véu escuro, textos brancos (visual cinema). */
+       textoClaro — true:  véu escuro, textos brancos (visual cinema).
+                    false: véu branco, textos escuros. */
     video: {
       ativo: true,
       arquivo: "assets/hero/hero.mp4",
@@ -56,6 +66,35 @@ window.CONTENT = {
       veu: 0.55,
       textoClaro: true
     }
+  },
+
+  /* ---------- ORÇAMENTO EM 1 TOQUE (logo abaixo da abertura) ----------
+     O cliente toca na faixa da conta de luz e cai no WhatsApp com a
+     mensagem pronta. {faixa} é trocado pela faixa que ele tocou. */
+  orcamentoRapido: {
+    tag: "Orçamento em 10 segundos",
+    titulo: "Quanto vem sua conta de luz?",
+    subtitulo: "Toque na sua faixa e fale direto com um consultor no WhatsApp. Sem cadastro.",
+    faixas: ["Até R$ 300", "R$ 300 a R$ 600", "R$ 600 a R$ 1.000", "Acima de R$ 1.000"],
+    mensagem: "Olá, R2 Energy! Quero um orçamento de energia solar. Minha conta de luz: {faixa} por mês.",
+    linkSimulador: "Prefere ver a economia antes? Abrir o simulador"
+  },
+
+  /* ---------- CHAMADA FINAL (antes do rodapé) ---------- */
+  contato: {
+    tag: "Fale com a R2 Energy",
+    titulo: "Pronto para reduzir sua conta de energia?",
+    texto: "Mande uma mensagem e um consultor monta o seu orçamento.",
+    ctaPrimario: "Pedir orçamento no WhatsApp",
+    ctaSecundario: "Simular economia"
+  },
+
+  /* ---------- BARRA FIXA NO CELULAR ----------
+     Aparece no rodapé da tela depois que o cliente passa da abertura. */
+  barraFixa: {
+    titulo: "Orçamento pelo WhatsApp",
+    texto: "Fale direto com um consultor",
+    botao: "Pedir"
   },
 
   /* ---------- SIMULADOR ---------- */
@@ -136,19 +175,27 @@ window.CONTENT = {
   prova: {
     tag: "Resultados que sustentam a decisão",
     titulo: "Números de quem entrega, não de quem promete",
+    // usados enquanto exibirNumeros estiver false (o título acima promete números)
+    tagSemNumeros: "Diferenciais",
+    tituloSemNumeros: "Por que escolher a R2 Energy",
     numeros: [
       { valor: "+320", rotulo: "sistemas instalados", detalhe: "residenciais e corporativos" },
       { valor: "8,4", sufixo: "MWp", rotulo: "potência instalada", detalhe: "em operação e monitorada" },
       { valor: "98", sufixo: "%", rotulo: "dos projetos no prazo", detalhe: "do contrato à conexão" },
       { valor: "4,9", sufixo: "/5", rotulo: "satisfação dos clientes", detalhe: "pesquisa pós-instalação" }
     ],
-    aviso: "Substitua estes números pelos dados reais da R2 Energy em content.js → prova.numeros.",
+    // Os números acima são EXEMPLOS. Ficam escondidos até você trocar pelos
+    // dados reais da R2 e mudar para true. Número inventado em anúncio pode
+    // ser considerado propaganda enganosa.
+    exibirNumeros: false,
     selos: [
       ["Engenharia própria", "Projeto assinado por engenheiro eletricista, com ART emitida."],
       ["Homologação inclusa", "Protocolo, vistoria e acompanhamento junto à concessionária."],
       ["Garantia real", "25 anos de performance, 12 anos de produto, 5 anos de instalação."],
       ["Monitoramento", "App com geração em tempo real e relatório mensal de economia."]
     ],
+    // Depoimento com colchete no nome ([NOME DO CLIENTE]) não aparece no site.
+    // Troque pelo nome real do cliente (com autorização dele) e ele surge sozinho.
     depoimentos: [
       { texto: "A conta caiu de mais de mil reais para a taxa mínima logo no primeiro mês. A equipe entregou no prazo e deixou tudo limpo.", autor: "[NOME DO CLIENTE]", papel: "Residência · [BAIRRO, CIDADE]" },
       { texto: "Fizeram o estudo de viabilidade com números que a diretoria entendeu. Hoje acompanhamos a geração do galpão pelo relatório mensal.", autor: "[NOME DO CLIENTE]", papel: "[EMPRESA] · Galpão de [X] m²" },

@@ -1,4 +1,4 @@
-# R2 Energy — site vitrine (v5.1)
+# R2 Energy — site vitrine (v6.0)
 
 Site estático em HTML/CSS/JS puro — sem instalação, sem build.
 
@@ -17,8 +17,10 @@ Site estático em HTML/CSS/JS puro — sem instalação, sem build.
 
 ## O que você troca sozinho (sem programar)
 - Textos, etapas, ficha técnica, telefone/WhatsApp, CNPJ, e-mail → `content.js`
+- Mensagens que chegam no WhatsApp do vendedor → `content.js` → `whatsapp`, `orcamentoRapido.mensagem`
+- Faixas de conta de luz do orçamento em 1 toque → `content.js` → `orcamentoRapido.faixas`
 - Tarifa (R$/kWh), custo por Wp, radiação por cidade → `content.js` → `simulador`
-- Cores e fontes → `styles.css` → bloco `:root`
+- Cores → `styles.css` → bloco `:root` (`--accent` é o azul dos botões)
 - Imagens e vídeos → pasta `assets/` (nomes em `assets/README.md`)
 
 ## O vídeo da abertura
@@ -28,7 +30,16 @@ do arquivo e os ajustes (`veu`, `textoClaro`, `ativo`) estão em
 Se o arquivo faltar, a abertura fica sem vídeo e nada quebra.
 
 ## Seções do site
-Abertura com vídeo → residencial (etapas da instalação e ficha técnica) → resultados e depoimentos → como funciona → dúvidas frequentes → contato.
-Os textos de todas elas estão em `content.js`: `hero`, `jornada`, `prova`, `processo`, `faq`.
+Abertura com vídeo → orçamento em 1 toque → residencial (etapas e ficha técnica) → diferenciais → como funciona → dúvidas → chamada final.
+No celular, uma barra fixa de WhatsApp aparece depois da abertura.
+Os textos de todas elas estão em `content.js`: `hero`, `orcamentoRapido`, `jornada`, `prova`, `processo`, `faq`, `contato`, `barraFixa`.
 
-⚠️ **Antes de publicar:** troque os números e depoimentos de exemplo em `content.js` → `prova` pelos dados reais da R2 Energy, e confirme a tarifa (`simulador.tarifaKwh`) e o custo por Wp (`simulador.custoPorWp`).
+## Anúncio do Instagram
+Quando o link do anúncio traz `fbclid` (a Meta põe sozinha) ou `utm_source=instagram`,
+toda mensagem de WhatsApp ganha a linha de `whatsapp.origemAnuncio` — o vendedor
+sabe na hora que o contato veio do anúncio.
+
+⚠️ **Antes de anunciar:**
+- Os números da empresa em `prova.numeros` são exemplos e ficam **escondidos** (`exibirNumeros: false`). Troque pelos reais e mude para `true`.
+- Depoimento com colchete no nome (`[NOME DO CLIENTE]`) **não aparece**. Troque pelo nome real, com autorização do cliente, e ele surge sozinho.
+- Confirme a tarifa (`simulador.tarifaKwh`), o custo por Wp (`simulador.custoPorWp`) e o e-mail (`empresa.email`).

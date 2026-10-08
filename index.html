@@ -2,52 +2,73 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <title>R2 Energy · Energia solar de alta performance</title>
-  <meta name="description" content="R2 Energy — projetos fotovoltaicos residenciais e corporativos com engenharia própria, alta performance e monitoramento em tempo real.">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700&family=Tektur:wght@500;600;700;800&display=swap" rel="stylesheet">
+  <meta name="description" content="Energia solar com engenharia própria em Fortaleza. Peça seu orçamento pelo WhatsApp em segundos.">
+  <meta name="theme-color" content="#FFFFFF">
+
+  <!-- Prévia do link no WhatsApp, Instagram e Facebook.
+       Fica no HTML (e não no content.js) porque esses robôs não rodam JavaScript. -->
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://r2energy.netlify.app/">
+  <meta property="og:title" content="R2 Energy · Energia solar de alta performance">
+  <meta property="og:description" content="Engenharia própria, instalação com precisão e monitoramento em tempo real. Peça seu orçamento pelo WhatsApp.">
+  <meta property="og:image" content="https://r2energy.netlify.app/assets/hero/hero-poster.jpg">
+  <meta property="og:image:width" content="1280">
+  <meta property="og:image:height" content="720">
+  <meta property="og:locale" content="pt_BR">
+  <meta name="twitter:card" content="summary_large_image">
+
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%230A78C2'/%3E%3Crect x='18' y='18' width='28' height='28' rx='6' fill='%23FFFFFF'/%3E%3C/svg%3E">
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
   <a class="skip" href="#main">Pular para o conteúdo</a>
 
-  <!-- ================= CABEÇALHO FIXO ================= -->
+  <!-- ================= CABEÇALHO ================= -->
   <header class="header" id="header">
     <a class="logo" href="#top" aria-label="R2 Energy — início">
       <span class="logo-mark" aria-hidden="true"></span>
       <span class="logo-text">R2 <em>Energy</em></span>
     </a>
     <nav class="nav" id="nav" aria-label="Navegação principal"></nav>
-    <button class="btn btn-primary btn-sim" id="btnSimHeader" type="button">Simular Orçamento</button>
-    <button class="menu-toggle" id="menuToggle" type="button" aria-label="Abrir menu" aria-expanded="false">
-      <span></span><span></span><span></span>
-    </button>
+    <a class="btn btn-primary btn-sm" id="btnHeaderWhats" href="#" target="_blank" rel="noopener"></a>
   </header>
 
   <main id="main">
-    <!-- ================= HERO ================= -->
+    <!-- ================= ABERTURA ================= -->
     <section class="hero" id="top">
       <!-- vídeo de fundo (montado pelo app.js a partir do content.js) -->
       <div class="hero-video" id="heroVideo" aria-hidden="true"></div>
       <div class="hero-inner">
-        <span class="tag" id="heroTag"></span>
+        <span class="eyebrow" id="heroTag"></span>
         <h1 class="hero-title" id="heroTitle"></h1>
         <p class="hero-sub" id="heroSub"></p>
-        <div class="hero-actions">
-          <button class="btn btn-primary btn-lg" id="btnSimHero" type="button"></button>
-          <a class="btn btn-ghost btn-lg" id="btnVerInstalacao" href="#residencial"></a>
+        <div class="hero-actions" id="heroActions">
+          <a class="btn btn-primary btn-lg" id="btnHeroWhats" href="#" target="_blank" rel="noopener"></a>
+          <button class="btn btn-glass btn-lg" id="btnSimHero" type="button"></button>
         </div>
-        <ul class="hero-numbers" id="heroNumbers"></ul>
+        <ul class="hero-stats" id="heroNumbers"></ul>
       </div>
-
     </section>
 
-    <!-- ================= JORNADAS (geradas pelo app.js) ================= -->
+    <!-- ================= ORÇAMENTO EM 1 TOQUE ================= -->
+    <section class="rapido" id="orcamento">
+      <div class="wrap">
+        <div class="rapido-card">
+          <span class="tag" id="rapidoTag"></span>
+          <h2 class="rapido-titulo" id="rapidoTitulo"></h2>
+          <p class="rapido-sub" id="rapidoSub"></p>
+          <div class="faixas" id="rapidoFaixas"></div>
+          <button class="link-btn" id="rapidoSim" type="button"></button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= RESIDENCIAL (gerada pelo app.js) ================= -->
     <div id="jornadas"></div>
 
-    <!-- ================= PROVA SOCIAL ================= -->
+    <!-- ================= RESULTADOS ================= -->
     <section class="prova" id="prova">
       <div class="wrap">
         <span class="tag" id="provaTag"></span>
@@ -67,7 +88,7 @@
       </div>
     </section>
 
-    <!-- ================= PERGUNTAS FREQUENTES ================= -->
+    <!-- ================= DÚVIDAS ================= -->
     <section class="faq" id="faq">
       <div class="wrap wrap-estreito">
         <span class="tag" id="faqTag"></span>
@@ -76,15 +97,15 @@
       </div>
     </section>
 
-    <!-- ================= CONTATO / RODAPÉ ================= -->
+    <!-- ================= CHAMADA FINAL ================= -->
     <section class="contato" id="contato">
       <div class="contato-inner">
-        <span class="tag">Fale com a R2 Energy</span>
-        <h2>Pronto para reduzir sua conta de energia?</h2>
-        <p>Faça uma simulação rápida ou fale diretamente com um consultor.</p>
-        <div class="hero-actions">
-          <button class="btn btn-primary btn-lg" id="btnSimContato" type="button">Simular Orçamento</button>
-          <a class="btn btn-ghost btn-lg" id="btnWhatsContato" href="#" target="_blank" rel="noopener">WhatsApp</a>
+        <span class="eyebrow" id="contatoTag"></span>
+        <h2 id="contatoTitulo"></h2>
+        <p id="contatoTexto"></p>
+        <div class="contato-actions">
+          <a class="btn btn-white btn-lg" id="btnWhatsContato" href="#" target="_blank" rel="noopener"></a>
+          <button class="btn btn-glass btn-lg" id="btnSimContato" type="button"></button>
         </div>
       </div>
     </section>
@@ -97,20 +118,29 @@
         <p class="footer-desc" id="footerDesc"></p>
       </div>
       <div class="footer-col">
-        <span class="footer-label">Contato corporativo</span>
+        <span class="footer-label">Contato</span>
         <a id="footerFone" href="#"></a>
         <a id="footerMail" href="#"></a>
         <span id="footerEnd"></span>
       </div>
       <div class="footer-col">
-        <span class="footer-label">Dados da empresa</span>
+        <span class="footer-label">Empresa</span>
         <span>CNPJ <strong id="footerCnpj"></strong></span>
         <span id="footerCred"></span>
       </div>
     </div>
   </footer>
 
-  <!-- ================= MODAL DO SIMULADOR ================= -->
+  <!-- ================= BARRA FIXA (só no celular) ================= -->
+  <div class="barra" id="barraFixa" aria-hidden="true">
+    <div class="barra-texto">
+      <strong id="barraTitulo"></strong>
+      <span id="barraTexto"></span>
+    </div>
+    <a class="btn btn-primary btn-sm" id="barraBtn" href="#" target="_blank" rel="noopener" tabindex="-1"></a>
+  </div>
+
+  <!-- ================= SIMULADOR ================= -->
   <dialog class="modal" id="simModal" aria-labelledby="simTitulo">
     <div class="modal-box">
       <button class="modal-close" id="simClose" type="button" aria-label="Fechar simulador">×</button>
@@ -154,7 +184,7 @@
 
         <div class="nota" id="resNota"></div>
 
-        <a class="btn btn-primary btn-lg btn-block btn-whats" id="resWhats" href="#" target="_blank" rel="noopener"></a>
+        <a class="btn btn-primary btn-lg btn-block" id="resWhats" href="#" target="_blank" rel="noopener"></a>
         <button class="btn btn-ghost btn-block" id="resRefazer" type="button">Refazer simulação</button>
       </div>
     </div>

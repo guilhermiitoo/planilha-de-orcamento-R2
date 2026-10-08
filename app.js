@@ -1,53 +1,62 @@
 /* =====================================================================
-   R2 ENERGY — app.js   v2.0
+   R2 ENERGY — app.js   v6.0
    ---------------------------------------------------------------------
    CHANGELOG
-   v4.0 (2026-09-12) — Cena de sobrevoo com dissolução entre fotos inteiras
-        (scene.js): sem recortes. "Saiba mais" mantém a placa e dissolve
-        para a foto de estúdio. Novas seções: prova social, como funciona
-        e perguntas frequentes. Hero com a placa em destaque. Otimizações
-        de carregamento (preload, lazy, decoding async).
-   v3.0 (2026-09-12) — Cena FOTOGRÁFICA (scene-photo.js): fotos reais em
-        camadas, placa recortada descendo e troca para a foto instalada.
-        Substitui a cena 3D da v2.0.
-   v2.0 (2026-09-12) — Cena 3D em tempo real (Three.js); amanhecer
-        dirigido pelo scroll; CNPJ corrigido.
-   v1.0 (2026-09-12) — Primeira versão: cabeçalho, hero, duas jornadas
-        com scroll scrubbing (15 quadros), modo "Saiba mais" com vídeo
-        que encolhe em card, simulador de orçamento com WhatsApp.
+   v6.0 (2026-10-08) — Redesenho completo, pensado para quem chega pelo
+        anúncio do Instagram: visual no estilo Apple, azul céu no lugar do
+        amarelo, celular compacto, orçamento em 1 toque pela faixa da conta
+        de luz, barra fixa de WhatsApp no celular, mensagens que avisam o
+        vendedor quando o contato veio de anúncio. Depoimentos com nome
+        provisório e números de exemplo deixam de aparecer.
+   v5.1 (2026-10-08) — Cena do scroll removida; seção residencial comum.
+   v5.0 (2026-09-13) — Vídeo em loop no fundo da abertura.
+   v4.0 (2026-09-12) — Cena de sobrevoo, prova social, como funciona, FAQ.
+   v1.0 (2026-09-12) — Primeira versão.
    ---------------------------------------------------------------------
    ORGANIZAÇÃO
-   1) CONFIG / helpers   2) RENDER estático   3) JORNADAS (scroll)
-   4) MODO DETALHE       5) SIMULADOR         6) INIT
+   1) CONFIG / helpers   2) RENDER    3) SEÇÃO RESIDENCIAL
+   4) BARRA FIXA         5) SIMULADOR 6) INIT
    ===================================================================== */
 (function () {
   "use strict";
   const C = window.CONTENT;
   const $ = (s, el = document) => el.querySelector(s);
-  const clamp = (v, a, b) => Math.min(b, Math.max(a, v));
-  const lerp = (a, b, t) => a + (b - a) * t;
   const pad2 = (n) => String(n).padStart(2, "0");
   const brl = (v) => v.toLocaleString("pt-BR", { style: "currency", currency: "BRL", maximumFractionDigits: 0 });
   const num = (v, d = 0) => v.toLocaleString("pt-BR", { maximumFractionDigits: d, minimumFractionDigits: d });
   const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-  const whatsLink = (msg) => `https://wa.me/${C.empresa.whatsapp}?text=${encodeURIComponent(msg)}`;
 
-  /* =========================== 2) RENDER ESTÁTICO =========================== */
+  /* ---- WhatsApp ----
+     Se o cliente chegou por anúncio da Meta (o link traz fbclid ou um
+     utm_source de Instagram/Facebook), a mensagem ganha uma linha avisando
+     o vendedor de onde veio o contato. */
+  const veioDeAnuncio = (() => {
+    const q = new URLSearchParams(location.search);
+    return q.has("fbclid") || /insta|^ig$|face|^fb$|meta/i.test(q.get("utm_source") || "");
+  })();
+  const whatsLink = (msg) => {
+    const texto = veioDeAnuncio && C.whatsapp.origemAnuncio ? `${msg}\n\n${C.whatsapp.origemAnuncio}` : msg;
+    return `https://wa.me/${C.empresa.whatsapp}?text=${encodeURIComponent(texto)}`;
+  };
+  const ICONE_WHATS = '<svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91c0 1.75.46 3.45 1.32 4.95L2.05 22l5.25-1.38a9.9 9.9 0 0 0 4.74 1.21c5.46 0 9.91-4.45 9.91-9.91C21.95 6.45 17.5 2 12.04 2Zm0 18.15c-1.48 0-2.93-.4-4.2-1.15l-.3-.18-3.12.82.83-3.04-.2-.31a8.2 8.2 0 0 1-1.26-4.38c0-4.54 3.7-8.24 8.25-8.24 4.54 0 8.24 3.7 8.24 8.24 0 4.55-3.7 8.24-8.24 8.24Zm4.52-6.16c-.25-.12-1.47-.72-1.69-.81-.23-.08-.39-.12-.56.13-.16.24-.64.8-.78.97-.15.16-.29.18-.54.06-.25-.13-1.05-.39-1.99-1.23-.74-.66-1.23-1.47-1.38-1.72-.14-.25-.01-.38.11-.5.11-.11.25-.29.37-.43.13-.15.17-.25.25-.42.08-.16.04-.31-.02-.43-.06-.13-.56-1.35-.77-1.84-.2-.48-.41-.42-.56-.43h-.48c-.17 0-.43.06-.66.31-.22.25-.86.85-.86 2.07 0 1.22.89 2.4 1.01 2.56.13.17 1.75 2.67 4.23 3.74.59.26 1.05.41 1.41.52.59.19 1.13.16 1.56.1.47-.07 1.47-.6 1.67-1.18.21-.58.21-1.07.15-1.18-.06-.1-.23-.16-.48-.29Z"/></svg>';
+  const comIcone = (texto) => `${ICONE_WHATS}<span>${texto}</span>`;
+
+  /* =========================== 2) RENDER =========================== */
   /* ---------------------------------------------------------------
      Vídeo de fundo da abertura. Montado a partir de C.hero.video.
      Roda em loop, sem som e sem controles. Se o arquivo não existir,
-     o vídeo se remove sozinho e a abertura volta a ser a de hoje —
-     por isso dá para preparar o site antes de ter o arquivo.
+     o vídeo se remove sozinho e a abertura segue sem ele.
      --------------------------------------------------------------- */
   function montarVideoHero() {
     const v = C.hero && C.hero.video;
     const caixa = $("#heroVideo");
+    const hero = $(".hero");
     if (!caixa) return;
     if (!v || !v.ativo || !v.arquivo) { caixa.remove(); return; }
 
-    const hero = $(".hero");
     hero.style.setProperty("--hero-veu", v.veu != null ? v.veu : 0.72);
     if (v.textoClaro) hero.classList.add("video-claro");
+    if (v.poster) caixa.style.backgroundImage = `url("${v.poster}")`;
 
     const el = document.createElement("video");
     el.src = v.arquivo;
@@ -69,37 +78,94 @@
         "). A abertura segue sem vídeo. Confira o nome do arquivo em content.js.");
     });
     el.addEventListener("loadeddata", () => hero.classList.add("tem-video"));
+    // o véu já entra com o pôster, para o texto branco nunca ficar sem fundo
+    if (v.poster) hero.classList.add("tem-video");
 
     caixa.appendChild(el);
     // alguns navegadores recusam o autoplay na primeira tentativa
     const tocar = () => { const p = el.play(); if (p) p.catch(() => {}); };
-    if (!reduceMotion) { tocar(); document.addEventListener("click", tocar, { once: true }); }
+    if (!reduceMotion) { tocar(); document.addEventListener("touchstart", tocar, { once: true, passive: true }); }
   }
 
   function renderStatic() {
-    // navegação
+    const e = C.empresa;
+    const msgPadrao = C.whatsapp.mensagemPadrao;
+    document.title = `${e.nome} · ${e.slogan}`;
+
+    // cabeçalho
     const nav = $("#nav");
     nav.innerHTML = C.nav.map((n) => `<a href="${n.alvo}">${n.rotulo}</a>`).join("");
-    const toggle = $("#menuToggle");
-    toggle.addEventListener("click", () => {
-      const open = nav.classList.toggle("is-open");
-      toggle.setAttribute("aria-expanded", String(open));
-    });
-    nav.addEventListener("click", (e) => { if (e.target.tagName === "A") nav.classList.remove("is-open"); });
+    const btnTopo = $("#btnHeaderWhats");
+    btnTopo.innerHTML = comIcone(C.ctaCabecalho);
+    btnTopo.href = whatsLink(msgPadrao);
 
-    // hero
+    // abertura
     $("#heroTag").textContent = C.hero.tag;
     $("#heroTitle").innerHTML = C.hero.titulo;
     $("#heroSub").textContent = C.hero.subtitulo;
-    $("#btnSimHero").textContent = C.hero.ctaPrimario;
-    $("#btnVerInstalacao").textContent = C.hero.ctaSecundario;
+    $("#btnHeroWhats").innerHTML = comIcone(C.hero.ctaPrimario);
+    $("#btnHeroWhats").href = whatsLink(msgPadrao);
+    $("#btnSimHero").textContent = C.hero.ctaSecundario;
     $("#heroNumbers").innerHTML = C.hero.numeros
       .map((n) => `<li><b>${n.valor}<small>${n.sufixo}</small></b><span>${n.rotulo}</span></li>`).join("");
     montarVideoHero();
 
-    // contato + rodapé
-    const e = C.empresa;
-    $("#btnWhatsContato").href = whatsLink(`Olá, ${e.nome}! Quero falar com um consultor sobre energia solar.`);
+    // orçamento em 1 toque
+    const R = C.orcamentoRapido;
+    $("#rapidoTag").textContent = R.tag;
+    $("#rapidoTitulo").textContent = R.titulo;
+    $("#rapidoSub").textContent = R.subtitulo;
+    $("#rapidoFaixas").innerHTML = R.faixas.map((f) =>
+      `<a class="faixa" target="_blank" rel="noopener" href="${whatsLink(R.mensagem.replace("{faixa}", f))}">
+         <span>${f}</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+       </a>`).join("");
+    $("#rapidoSim").textContent = R.linkSimulador;
+
+    // resultados / diferenciais
+    const P = C.prova;
+    const comNumeros = P.exibirNumeros === true;
+    $("#provaTag").textContent = comNumeros ? P.tag : (P.tagSemNumeros || P.tag);
+    $("#provaTitulo").textContent = comNumeros ? P.titulo : (P.tituloSemNumeros || P.titulo);
+    if (comNumeros) {
+      $("#provaNumeros").innerHTML = P.numeros.map((n) =>
+        `<li><b>${n.valor}${n.sufixo ? `<small>${n.sufixo}</small>` : ""}</b><strong>${n.rotulo}</strong><span>${n.detalhe}</span></li>`).join("");
+    } else {
+      $("#provaNumeros").remove();
+    }
+    $("#provaSelos").innerHTML = P.selos.map(([t, d]) =>
+      `<div class="selo"><span class="selo-ico" aria-hidden="true"></span><h3>${t}</h3><p>${d}</p></div>`).join("");
+    // depoimento com nome provisório ([NOME DO CLIENTE]) não vai para o ar
+    const reais = P.depoimentos.filter((d) => !/\[/.test(d.autor + d.papel));
+    if (reais.length) {
+      $("#provaDepo").innerHTML = reais.map((d) =>
+        `<figure class="depo"><blockquote>${d.texto}</blockquote><figcaption><strong>${d.autor}</strong><span>${d.papel}</span></figcaption></figure>`).join("");
+    } else {
+      $("#provaDepo").remove();
+    }
+
+    // como funciona
+    const PR = C.processo;
+    $("#procTag").textContent = PR.tag;
+    $("#procTitulo").textContent = PR.titulo;
+    $("#procPassos").innerHTML = PR.passos.map((x) =>
+      `<li class="passo"><span class="passo-n">${x.n}</span><div><h3>${x.titulo}</h3><p>${x.texto}</p></div></li>`).join("");
+
+    // dúvidas
+    $("#faqTag").textContent = C.faq.tag;
+    $("#faqTitulo").textContent = C.faq.titulo;
+    $("#faqLista").innerHTML = C.faq.itens.map(([q, a]) =>
+      `<details class="faq-item"><summary>${q}</summary><p>${a}</p></details>`).join("");
+
+    // chamada final
+    const K = C.contato;
+    $("#contatoTag").textContent = K.tag;
+    $("#contatoTitulo").textContent = K.titulo;
+    $("#contatoTexto").textContent = K.texto;
+    $("#btnWhatsContato").innerHTML = comIcone(K.ctaPrimario);
+    $("#btnWhatsContato").href = whatsLink(msgPadrao);
+    $("#btnSimContato").textContent = K.ctaSecundario;
+
+    // rodapé
     $("#footerDesc").textContent = C.rodape.descricao;
     $("#footerFone").textContent = e.telefoneExibicao;
     $("#footerFone").href = `tel:+${e.whatsapp}`;
@@ -108,38 +174,6 @@
     $("#footerEnd").textContent = e.endereco;
     $("#footerCnpj").textContent = e.cnpj;
     $("#footerCred").textContent = `© ${e.ano} · ${C.rodape.creditos}`;
-    document.title = `${e.nome} · ${e.slogan}`;
-
-    // ---- prova social ----
-    const P = C.prova;
-    $("#provaTag").textContent = P.tag;
-    $("#provaTitulo").textContent = P.titulo;
-    $("#provaNumeros").innerHTML = P.numeros.map((n) =>
-      `<li><b>${n.valor}${n.sufixo ? `<small>${n.sufixo}</small>` : ""}</b><strong>${n.rotulo}</strong><span>${n.detalhe}</span></li>`).join("");
-    $("#provaSelos").innerHTML = P.selos.map(([t, d]) =>
-      `<div class="selo"><h3>${t}</h3><p>${d}</p></div>`).join("");
-    $("#provaDepo").innerHTML = P.depoimentos.map((d) =>
-      `<figure class="depo"><blockquote>${d.texto}</blockquote><figcaption><strong>${d.autor}</strong><span>${d.papel}</span></figcaption></figure>`).join("");
-
-    // ---- como funciona ----
-    const PR = C.processo;
-    $("#procTag").textContent = PR.tag;
-    $("#procTitulo").textContent = PR.titulo;
-    $("#procPassos").innerHTML = PR.passos.map((x) =>
-      `<li class="passo"><span class="passo-n">${x.n}</span><h3>${x.titulo}</h3><p>${x.texto}</p></li>`).join("");
-
-    // ---- perguntas frequentes ----
-    $("#faqTag").textContent = C.faq.tag;
-    $("#faqTitulo").textContent = C.faq.titulo;
-    $("#faqLista").innerHTML = C.faq.itens.map(([q, a], i) =>
-      `<details class="faq-item"${i === 0 ? " open" : ""}><summary>${q}</summary><p>${a}</p></details>`).join("");
-
-    // aparecer suavemente ao entrar na tela
-    const aoEntrar = new IntersectionObserver((ents) => {
-      ents.forEach((e) => { if (e.isIntersecting) { e.target.classList.add("is-vis"); aoEntrar.unobserve(e.target); } });
-    }, { rootMargin: "0px 0px -12% 0px" });
-    document.querySelectorAll(".numeros li, .selo, .depo, .passo, .faq-item, .sec-titulo, .prova .tag, .processo .tag, .faq .tag")
-      .forEach((el) => { el.classList.add("sobe"); aoEntrar.observe(el); });
 
     // destaque do link ativo no menu
     const links = [...nav.querySelectorAll("a")];
@@ -152,9 +186,19 @@
     C.nav.forEach((n) => { const s = $(n.alvo); if (s) obs.observe(s); });
   }
 
+  // aparecer suavemente ao entrar na tela
+  function animarEntrada() {
+    if (reduceMotion || !("IntersectionObserver" in window)) return;
+    const aoEntrar = new IntersectionObserver((ents) => {
+      ents.forEach((en) => { if (en.isIntersecting) { en.target.classList.add("is-vis"); aoEntrar.unobserve(en.target); } });
+    }, { rootMargin: "0px 0px -8% 0px" });
+    document.querySelectorAll(".rapido-card, .sec-titulo, .etapa-card, .ficha-card, .numeros li, .selo, .depo, .passo, .faq-lista, .contato-inner")
+      .forEach((el) => { el.classList.add("sobe"); aoEntrar.observe(el); });
+  }
+
   /* =========================== 3) SEÇÃO RESIDENCIAL =========================== */
-  /* Seção comum: cabeçalho, as etapas em cards e a ficha técnica aberta na
-     própria página. Sem scroll travado e sem cena de imagens.            */
+  /* As etapas da instalação (no celular, um carrossel que desliza para o
+     lado) e a ficha técnica aberta na própria página.                   */
   const J = C.jornada;
 
   function buildSecao(sec) {
@@ -165,28 +209,50 @@
       <div class="wrap">
         <span class="tag">${sec.tag}</span>
         <h2 class="sec-titulo">${sec.titulo}</h2>
-
-        <ol class="etapas-grid">
-          ${sec.etapas.map((et, i) => `
-            <li class="etapa-card">
-              <span class="etapa-num">${pad2(i + 1)}</span>
-              <h3>${et.titulo}</h3>
-              <p>${et.texto}</p>
-            </li>`).join("")}
-        </ol>
-
-        <div class="ficha-bloco">
+      </div>
+      <ol class="etapas-trilho">
+        ${sec.etapas.map((et, i) => `
+          <li class="etapa-card">
+            <span class="etapa-num">${pad2(i + 1)}</span>
+            <h3>${et.titulo}</h3>
+            <p>${et.texto}</p>
+          </li>`).join("")}
+      </ol>
+      <div class="wrap">
+        <div class="ficha-card">
           <div class="ficha-texto">
             <span class="tag">${sec.detalhe.tag}</span>
             <h3>${sec.detalhe.titulo}</h3>
             <p class="desc">${sec.detalhe.descricao}</p>
             <a class="btn btn-primary btn-lg" target="_blank" rel="noopener"
-               href="${whatsLink(`Olá, ${C.empresa.nome}! Vi a página "${sec.detalhe.titulo}" no site e quero falar com um consultor.`)}">${sec.detalhe.ctaConsultor}</a>
+               href="${whatsLink(`Olá, ${C.empresa.nome}! Vi "${sec.detalhe.titulo}" no site e quero falar com um consultor.`)}">${comIcone(sec.detalhe.ctaConsultor)}</a>
           </div>
-          <ul class="ficha">${sec.detalhe.ficha.map(([k, v]) => `<li><b>${k}</b><span>${v}</span></li>`).join("")}</ul>
+          <dl class="ficha">${sec.detalhe.ficha.map(([k, v]) => `<div><dt>${k}</dt><dd>${v}</dd></div>`).join("")}</dl>
         </div>
       </div>`;
     $("#jornadas").appendChild(el);
+  }
+
+  /* =========================== 4) BARRA FIXA =========================== */
+  /* No celular, aparece depois que os botões da abertura saem da tela e
+     some de novo na chamada final — para nunca haver dois botões iguais
+     visíveis ao mesmo tempo.                                            */
+  function initBarra() {
+    const B = C.barraFixa, barra = $("#barraFixa"), btn = $("#barraBtn");
+    $("#barraTitulo").textContent = B.titulo;
+    $("#barraTexto").textContent = B.texto;
+    btn.innerHTML = comIcone(B.botao);
+    btn.href = whatsLink(C.whatsapp.mensagemPadrao);
+    if (!("IntersectionObserver" in window)) return;
+    let noTopo = true, noFim = false;
+    const atualizar = () => {
+      const ligada = !noTopo && !noFim;
+      barra.classList.toggle("is-on", ligada);
+      barra.setAttribute("aria-hidden", String(!ligada));
+      btn.tabIndex = ligada ? 0 : -1;
+    };
+    new IntersectionObserver(([en]) => { noTopo = en.isIntersecting; atualizar(); }).observe($("#heroActions"));
+    new IntersectionObserver(([en]) => { noFim = en.isIntersecting; atualizar(); }, { threshold: 0.15 }).observe($("#contato"));
   }
 
   /* =========================== 5) SIMULADOR =========================== */
@@ -198,9 +264,9 @@
     $("#simTitulo").textContent = S.titulo;
     $("#simSub").textContent = S.subtitulo;
     $("#resNota").innerHTML = S.notaGarantia;
-    $("#resWhats").textContent = S.ctaFinal;
+    $("#resWhats").innerHTML = comIcone(S.ctaFinal);
 
-    ["#btnSimHeader", "#btnSimHero", "#btnSimContato"].forEach((id) => $(id).addEventListener("click", openSim));
+    ["#btnSimHero", "#btnSimContato", "#rapidoSim"].forEach((id) => $(id).addEventListener("click", openSim));
     $("#simClose").addEventListener("click", () => modal.close());
     modal.addEventListener("click", (e) => { if (e.target === modal) modal.close(); });
     modal.addEventListener("close", () => document.body.classList.remove("is-locked"));
@@ -222,7 +288,8 @@
   function openSim() {
     if (!modal.open) modal.showModal();
     document.body.classList.add("is-locked");
-    setTimeout(() => $("#simValor").focus(), 50);
+    // no celular, não abre o teclado por cima da folha antes de o cliente ver o simulador
+    if (window.matchMedia("(min-width: 834px)").matches) setTimeout(() => $("#simValor").focus(), 50);
     if (!sim.cidade) detectarLocalizacao();
   }
 
@@ -315,7 +382,9 @@
   function init() {
     renderStatic();
     J.secoes.forEach(buildSecao);
+    initBarra();
     initSimulador();
+    animarEntrada();
   }
   document.addEventListener("DOMContentLoaded", init);
 })();
