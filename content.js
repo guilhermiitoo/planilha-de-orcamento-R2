@@ -53,8 +53,8 @@ window.CONTENT = {
       ativo: true,
       arquivo: "assets/hero/hero.mp4",
       poster: "assets/hero/hero-poster.jpg",
-      veu: 0.72,
-      textoClaro: false
+      veu: 0.55,
+      textoClaro: true
     }
   },
 
