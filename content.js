@@ -101,32 +101,13 @@ window.CONTENT = {
     mensagemWhats: "Olá, R2 Energy! Fiz uma simulação no site e quero receber uma proposta detalhada."
   },
 
-  /* ---------- SEÇÕES DE SCROLL (a jornada da instalação) ---------- */
+  /* ---------- SEÇÃO RESIDENCIAL (etapas + ficha técnica) ---------- */
   jornada: {
-    totalQuadros: 15,                 // "quadros" exibidos no contador de progresso
-    alturaScrollVh: 560,              // quanto o usuário rola para ver a cena inteira (em % da altura da tela)
-    pausaFinal: 0.16,                 // fração final do scroll em que o último quadro fica parado
     secoes: [
       {
         id: "residencial",
         tag: "Projetos Residenciais",
         titulo: "A jornada da sua instalação",
-        cena: {
-          proporcao: 1600 / 873,
-          camera: { z0: 1.15, z1: 1.03, x0: -2.5, y0: -3, x1: 3, y1: 0.5 },
-          sol: { x: 60, y: 12 },
-          // as fotos são dissolvidas nesta ordem, conforme o scroll
-          camadas: [
-            { src: "assets/residencial/flutuando.jpg" },
-            { src: "assets/residencial/instalada.jpg", de: 0.46, ate: 0.88 }
-          ],
-          // MODO VÍDEO: cole os quadros extraídos do vídeo na pasta abaixo, com os
-          // nomes frame_001.jpg, frame_002.jpg … e ajuste "total" para a quantidade exata.
-          // Enquanto a pasta estiver vazia, o site usa a dissolução entre as fotos acima.
-          quadros: { pasta: "assets/residencial/quadros/", total: 131, prefixo: "frame_", digitos: 3, ext: "jpg" },
-          estudio: "assets/residencial/ceu.jpg"   // foto usada no "Saiba mais"
-        },
-        video: "assets/residencial/instalacao.mp4",
         etapas: [
           { titulo: "Discussão inicial", texto: "Dimensionamento de alta performance para sua demanda." },
           { titulo: "Planejamento",      texto: "Mapeamento estrutural e máxima captação solar." },
@@ -148,9 +129,7 @@ window.CONTENT = {
           ctaConsultor: "Falar com Consultor"
         }
       }
-    ],
-    rotuloSaibaMais: "Saiba mais",
-    rotuloVoltar: "Voltar"
+    ]
   },
 
   /* ---------- PROVA: números, garantias e depoimentos ---------- */

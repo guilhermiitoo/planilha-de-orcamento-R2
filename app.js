@@ -152,160 +152,42 @@
     C.nav.forEach((n) => { const s = $(n.alvo); if (s) obs.observe(s); });
   }
 
-  /* =========================== 3) JORNADAS (scroll scrubbing) =========================== */
+  /* =========================== 3) SEÇÃO RESIDENCIAL =========================== */
+  /* Seção comum: cabeçalho, as etapas em cards e a ficha técnica aberta na
+     própria página. Sem scroll travado e sem cena de imagens.            */
   const J = C.jornada;
-  const jornadas = [];   // um objeto de estado por seção
-  let detail = null;     // seção atualmente em modo detalhe (ou null)
 
-  function buildJornada(sec) {
+  function buildSecao(sec) {
     const el = document.createElement("section");
-    el.className = "jornada";
+    el.className = "etapasec";
     el.id = sec.id;
-    el.style.height = J.alturaScrollVh + "vh";
     el.innerHTML = `
-      <div class="jornada-sticky">
-        <div class="scene" aria-hidden="true"></div>
-        <div class="scene-shade"></div>
+      <div class="wrap">
+        <span class="tag">${sec.tag}</span>
+        <h2 class="sec-titulo">${sec.titulo}</h2>
 
-        <div class="jornada-head">
-          <span class="tag">${sec.tag}</span>
-          <h2>${sec.titulo}</h2>
-        </div>
+        <ol class="etapas-grid">
+          ${sec.etapas.map((et, i) => `
+            <li class="etapa-card">
+              <span class="etapa-num">${pad2(i + 1)}</span>
+              <h3>${et.titulo}</h3>
+              <p>${et.texto}</p>
+            </li>`).join("")}
+        </ol>
 
-        <div class="etapas">
-          ${sec.etapas.map((et) => `<div class="etapa"><small>${et.titulo}</small><p>${et.texto}</p></div>`).join("")}
-          <button class="btn btn-primary btn-saiba" type="button">${J.rotuloSaibaMais}</button>
-        </div>
-
-        <div class="progress"><span class="idx">01 / ${pad2(J.totalQuadros)}</span><span class="bar"><i></i></span></div>
-
-        <div class="detalhe-bg"></div>
-        <div class="video-wrap">
-          <img class="estudio-img" src="${sec.cena.estudio}" alt="Placa solar de alta eficiência vista de frente" loading="lazy" decoding="async">
-        </div>
-        <div class="detalhe-texto">
-          <span class="tag">${sec.detalhe.tag}</span>
-          <h2>${sec.detalhe.titulo}</h2>
-          <p class="desc">${sec.detalhe.descricao}</p>
-          <ul class="ficha">${sec.detalhe.ficha.map(([k, v]) => `<li><b>${k}</b><span>${v}</span></li>`).join("")}</ul>
-          <div class="detalhe-actions">
+        <div class="ficha-bloco">
+          <div class="ficha-texto">
+            <span class="tag">${sec.detalhe.tag}</span>
+            <h3>${sec.detalhe.titulo}</h3>
+            <p class="desc">${sec.detalhe.descricao}</p>
             <a class="btn btn-primary btn-lg" target="_blank" rel="noopener"
                href="${whatsLink(`Olá, ${C.empresa.nome}! Vi a página "${sec.detalhe.titulo}" no site e quero falar com um consultor.`)}">${sec.detalhe.ctaConsultor}</a>
-            <button class="btn btn-ghost btn-lg btn-voltar" type="button">${J.rotuloVoltar}</button>
           </div>
+          <ul class="ficha">${sec.detalhe.ficha.map(([k, v]) => `<li><b>${k}</b><span>${v}</span></li>`).join("")}</ul>
         </div>
       </div>`;
     $("#jornadas").appendChild(el);
-
-    const st = {
-      sec, el,
-      sticky: $(".jornada-sticky", el),
-      sceneEl: $(".scene", el),
-      etapas: [...el.querySelectorAll(".etapa")],
-      btnSaiba: $(".btn-saiba", el),
-      btnVoltar: $(".btn-voltar", el),
-      progIdx: $(".progress .idx", el),
-      progBar: $(".progress .bar i", el),
-      phase: 0             // 0..1 — posição dentro da jornada
-    };
-    st.scene3d = new window.Scene(st.sceneEl, sec.cena);
-    st.sceneEl.style.setProperty("--sol-x", sec.cena.sol.x + "%");
-    st.sceneEl.style.setProperty("--sol-y", sec.cena.sol.y + "%");
-    new IntersectionObserver((en) => st.scene3d.setVisible(en[0].isIntersecting)).observe(el);
-    st.btnSaiba.addEventListener("click", () => openDetail(st));
-    st.btnVoltar.addEventListener("click", () => closeDetail(st));
-
-    jornadas.push(st);
-    return st;
   }
-
-  // Fração rolada da seção (0 = topo encostou, 1 = fim da seção)
-  function progressOf(st) {
-    const rect = st.el.getBoundingClientRect();
-    const total = st.el.offsetHeight - window.innerHeight;
-    return clamp(-rect.top / total, 0, 1);
-  }
-
-  // Desenha a cena inteira a partir de "phase" (0..1). É uma função pura do scroll:
-  // rolar para cima refaz a cena exatamente ao contrário.
-  function paintScene(st, phase) {
-    st.scene3d.update(phase);
-    const idx = Math.round(phase * (J.totalQuadros - 1));
-    st.progIdx.textContent = `${pad2(idx + 1)} / ${pad2(J.totalQuadros)}`;
-    st.progBar.style.width = (phase * 100).toFixed(1) + "%";
-  }
-  const easeOut = (t) => 1 - Math.pow(1 - t, 3);
-
-  // Os textos surgem em pontos fixos da jornada
-  const ETAPA_PONTOS = [0.06, 0.32, 0.58, 0.82];
-  function paintTexts(st, phase) {
-    let ativa = -1;
-    ETAPA_PONTOS.forEach((pt, i) => { if (phase >= pt) ativa = i; });
-    st.etapas.forEach((e, i) => {
-      e.classList.toggle("is-in", phase >= ETAPA_PONTOS[i]);
-      e.classList.toggle("is-atual", i === ativa);        // no celular, só a atual fica visível
-    });
-    st.etapas[0].parentElement.classList.toggle("is-empty", phase < ETAPA_PONTOS[0]);
-    st.btnSaiba.classList.toggle("is-in", phase >= 0.86);
-  }
-
-  function renderJornada(st) {
-    if (detail === st) return;                       // em modo detalhe a cena fica congelada no último quadro
-    const p = progressOf(st);
-    // a parte final do scroll é uma "pausa": o último quadro fica parado antes da página deslizar
-    const phase = reduceMotion ? 1 : clamp(p / (1 - J.pausaFinal), 0, 1);
-    st.phase = phase;
-    paintScene(st, phase);
-    paintTexts(st, phase);
-  }
-
-  let ticking = false;
-  function onScroll() {
-    if (ticking) return;
-    ticking = true;
-    requestAnimationFrame(() => { jornadas.forEach(renderJornada); ticking = false; });
-  }
-
-  /* =========================== 4) MODO DETALHE ("Saiba mais") =========================== */
-  function openDetail(st) {
-    if (detail) return;
-    detail = st;
-    st.savedScroll = window.scrollY;
-    document.body.classList.add("is-locked");       // trava a página; a posição do scroll é preservada
-    st.sticky.classList.add("is-detail");
-    st.btnVoltar.focus({ preventScroll: true });
-
-    // 1) os quadros correm sozinhos até o último
-    animatePhase(st, st.phase, 1, reduceMotion ? 0 : 700, () => {
-      // 2) a foto de estúdio entra em tela cheia (a placa continua no mesmo lugar)
-      // 3) depois de um instante, encolhe para o card ao lado do texto
-      setTimeout(() => st.sticky.classList.add("is-detail-docked"), reduceMotion ? 0 : 1100);
-    });
-  }
-  function closeDetail(st) {
-    if (detail !== st) return;
-    st.sticky.classList.remove("is-detail-docked");
-    setTimeout(() => {
-      st.sticky.classList.remove("is-detail");
-      document.body.classList.remove("is-locked");
-      document.documentElement.classList.add("no-smooth");
-      window.scrollTo(0, st.savedScroll);              // garante o mesmo ponto do scroll
-      document.documentElement.classList.remove("no-smooth");
-      detail = null;
-      renderJornada(st);                              // volta à vitrine exatamente no ponto em que estava
-      st.btnSaiba.focus({ preventScroll: true });
-    }, reduceMotion ? 0 : 650);
-  }
-  function animatePhase(st, from, to, ms, done) {
-    if (ms === 0) { paintScene(st, to); done && done(); return; }
-    const t0 = performance.now();
-    (function step(now) {
-      const t = clamp((now - t0) / ms, 0, 1);
-      paintScene(st, lerp(from, to, easeOut(t)));
-      if (t < 1) requestAnimationFrame(step); else done && done();
-    })(t0);
-  }
-  document.addEventListener("keydown", (e) => { if (e.key === "Escape" && detail) closeDetail(detail); });
 
   /* =========================== 5) SIMULADOR =========================== */
   const S = C.simulador;
@@ -432,12 +314,8 @@
   /* =========================== 6) INIT =========================== */
   function init() {
     renderStatic();
-    J.secoes.forEach(buildJornada);
+    J.secoes.forEach(buildSecao);
     initSimulador();
-    window.addEventListener("scroll", onScroll, { passive: true });
-    window.addEventListener("resize", () => jornadas.forEach(renderJornada));
-    jornadas.forEach(renderJornada);
-    window.__r2 = { jornadas };                     // acesso para depuração no console
   }
   document.addEventListener("DOMContentLoaded", init);
 })();

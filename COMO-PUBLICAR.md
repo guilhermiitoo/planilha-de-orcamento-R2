@@ -1,16 +1,15 @@
 # Como publicar no GitHub + Netlify
 
 ## 1. Antes de subir
-Confirme que os quadros do vídeo estão em `assets/residencial/quadros/`
-e que `content.js` tem o número certo em `cena.quadros.total`.
-Se a pasta estiver vazia, o site funciona mesmo assim — usa as fotos.
+Confirme que o vídeo da abertura está em `assets/hero/hero.mp4`.
+Se ele faltar, o site funciona mesmo assim — a abertura fica sem vídeo.
 
 ## 2. GitHub
 1. Crie uma conta em github.com (se ainda não tiver).
 2. Clique em **New repository**. Nome: `r2-energy`. Deixe **Public**. Crie.
 3. Na tela seguinte, clique em **uploading an existing file**.
 4. Arraste TODOS os arquivos e pastas deste projeto (index.html, styles.css,
-   app.js, content.js, scene.js, netlify.toml e a pasta assets inteira).
+   app.js, content.js, netlify.toml e a pasta assets inteira).
    ⚠️ Arraste o CONTEÚDO da pasta, não a pasta r2-energy em si.
 5. Escreva qualquer coisa em "Commit changes" e confirme.
 

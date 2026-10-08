@@ -143,106 +143,52 @@ button { font: inherit; cursor: pointer; }
 .scroll-hint span { width: 1px; height: 36px; background: var(--muted); animation: hint 1.6s infinite; }
 @keyframes hint { 0% { transform: scaleY(0); transform-origin: top; } 50% { transform: scaleY(1); transform-origin: top; } 51% { transform-origin: bottom; } 100% { transform: scaleY(0); transform-origin: bottom; } }
 
-/* =====================================================================
-   JORNADA — scroll scrubbing
-   A seção é alta (vários vh). Dentro dela um bloco "sticky" fica preso
-   na tela enquanto o usuário rola, e o JS troca o quadro conforme a
-   fração rolada (0 → 1). Rolar para cima volta os quadros.
-   ===================================================================== */
-.jornada { position: relative; height: 520vh; }
-.jornada-sticky { position: sticky; top: 0; height: 100vh; overflow: hidden; background: #0B1220; }
-.jornada-sticky.is-detail .ph-sun, .jornada-sticky.is-detail .ph-rays { opacity: 0 !important; transition: opacity .4s; }
-
-.scene { position: absolute; inset: 0; }
-.scene.is-off { visibility: hidden; }
-
-/* ---- cena de sobrevoo com dissolução ---- */
-.cena { position: absolute; inset: 0; overflow: hidden; background: #0B1220; }
-.cena-cam { position: absolute; will-change: transform, filter; }
-.cena-quadros { position: absolute; inset: 0; display: none; background: #0B1220; }
-.cena-quadros .quadro { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: 0; }
-.cena-quadros .quadro.is-on { opacity: 1; }
-/* quando os quadros do vídeo existem, eles substituem as fotos */
-.cena.tem-quadros .cena-quadros { display: block; }
-.cena.tem-quadros .cena-cam { display: none; }
-.cena-img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: fill; will-change: opacity; }
-.cena-sol { position: absolute; left: var(--sol-x, 60%); top: var(--sol-y, 18%); width: 42vw; height: 42vw; max-width: 700px; max-height: 700px;
-  transform: translate(-50%, -50%); pointer-events: none; mix-blend-mode: screen;
-  background: radial-gradient(circle, rgba(255,248,226,.9) 0%, rgba(255,206,124,.45) 20%, rgba(255,160,60,.16) 45%, transparent 70%); }
-.cena-veu { position: absolute; inset: 0; pointer-events: none; mix-blend-mode: multiply;
-  background: linear-gradient(180deg, rgba(18,30,72,.6), rgba(8,14,36,.35)); }
-.cena-brilho { position: absolute; left: 50%; top: 58%; width: 46vw; height: 26vw; transform: translate(-50%, -50%);
-  pointer-events: none; mix-blend-mode: screen; opacity: 0; transition: opacity .2s linear;
-  background: radial-gradient(ellipse at center, rgba(255,242,210,.7), rgba(255,190,90,.22) 42%, transparent 72%); filter: blur(12px); }
-.cena-vinheta { position: absolute; inset: 0; pointer-events: none;
-  background: radial-gradient(ellipse at 50% 45%, transparent 46%, rgba(10,14,28,.4) 100%); }
-
-/* névoa para legibilidade do texto à esquerda */
-.scene-shade { position: absolute; inset: 0; pointer-events: none;
-  background: linear-gradient(90deg, rgba(255,255,255,.45) 0%, rgba(255,255,255,.18) 36%, transparent 60%); }
-
-.jornada-head { position: absolute; top: calc(var(--header-h) + 22px); left: clamp(20px, 5vw, 64px); z-index: 3; }
-.jornada-head h2 { font-size: clamp(22px, 2.4vw, 32px); font-weight: 700; margin-top: 12px; max-width: 480px; }
-
-.etapas { position: absolute; left: clamp(20px, 5vw, 64px); bottom: clamp(48px, 10vh, 110px); z-index: 3; max-width: 540px; display: flex; flex-direction: column; gap: 18px;
-  padding: 26px 28px 26px 26px; border-radius: 18px; background: rgba(255,255,255,.62); backdrop-filter: blur(16px) saturate(140%); -webkit-backdrop-filter: blur(16px) saturate(140%);
-  border: 1px solid rgba(255,255,255,.7); box-shadow: 0 24px 60px -20px rgba(15,23,42,.35); }
-.jornada-head .tag, .jornada-head h2 { text-shadow: 0 1px 0 rgba(255,255,255,.6); }
-.jornada-head { padding: 14px 18px; border-radius: 14px; background: rgba(255,255,255,.55); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); }
-.etapas.is-empty { opacity: 0; transform: translateY(16px); }
-.etapas { transition: opacity .5s var(--ease), transform .5s var(--ease); }
-.etapa {
-  position: relative; padding-left: 22px; opacity: 0; transform: translateY(28px); transition: opacity .55s var(--ease), transform .55s var(--ease);
-}
-.etapa::before { content: ""; position: absolute; left: 0; top: 4px; bottom: 4px; width: 4px; border-radius: 2px; background: var(--border); transition: background .4s; }
-.etapa.is-in { opacity: 1; transform: none; }
-.etapa.is-in::before { background: var(--accent); }
-.etapa small { display: block; font-family: var(--font-title); font-size: 11px; letter-spacing: .16em; text-transform: uppercase; color: var(--accent-strong); font-weight: 700; margin-bottom: 4px; }
-.etapa p { font-size: clamp(17px, 1.6vw, 22px); font-weight: 600; line-height: 1.3; }
-.btn-saiba { align-self: flex-start; margin-left: 22px; opacity: 0; transform: translateY(20px); transition: opacity .5s var(--ease) .15s, transform .5s var(--ease) .15s; }
-.btn-saiba.is-in { opacity: 1; transform: none; }
-
-.progress { position: absolute; right: clamp(20px, 5vw, 64px); bottom: clamp(48px, 10vh, 110px); z-index: 3; font-family: var(--font-title); font-size: 12px; letter-spacing: .14em; color: var(--text); display: flex; align-items: center; gap: 12px; padding: 8px 12px; border-radius: 999px; background: rgba(255,255,255,.6); backdrop-filter: blur(10px); }
-.progress .bar { width: 120px; height: 3px; background: var(--border); border-radius: 2px; overflow: hidden; }
-.progress .bar i { display: block; height: 100%; width: 0; background: var(--accent); }
-
-/* ---------- MODO DETALHE ("Saiba mais") ---------- */
-.detalhe-bg { position: absolute; inset: 0; background: var(--bg-detalhe); opacity: 0; pointer-events: none; transition: opacity .4s var(--ease); z-index: 4; }
-.detalhe-texto {
-  position: absolute; z-index: 6; left: clamp(20px, 5vw, 64px); top: 50%; transform: translateY(calc(-50% + 30px));
-  width: min(46vw, 560px); opacity: 0; pointer-events: none; transition: opacity .3s var(--ease), transform .3s var(--ease);
-}
-.detalhe-texto h2 { font-size: clamp(26px, 2.8vw, 40px); font-weight: 800; margin: 14px 0 16px; line-height: 1.08; }
-.detalhe-texto .desc { color: var(--muted); font-size: 16px; }
-.ficha { list-style: none; padding: 0; margin: 22px 0 26px; border-top: 1px solid var(--border); }
-.ficha li { display: grid; grid-template-columns: 110px 1fr; gap: 12px; padding: 10px 0; border-bottom: 1px solid var(--border); font-size: 14px; }
-.ficha li b { font-family: var(--font-title); font-size: 11px; letter-spacing: .14em; text-transform: uppercase; color: var(--accent-strong); padding-top: 2px; }
-.detalhe-actions { display: flex; gap: 12px; flex-wrap: wrap; }
-
-.video-wrap { position: absolute; inset: 0; z-index: 5; opacity: 0; pointer-events: none; transition: opacity .6s var(--ease); background: #000; }
-.video-wrap video, .video-wrap .estudio-img { width: 100%; height: 100%; object-fit: cover; }
-.video-wrap { background: var(--bg-detalhe); }
-.video-ph { display: grid; place-items: center; background: radial-gradient(circle at 40% 40%, #1E3A8A, #0B1220 70%); color: #fff; font-family: var(--font-title); letter-spacing: .14em; font-size: 12px; text-align: center; padding: 20px; line-height: 1.8; }
-.video-ph b { display: block; font-size: 16px; letter-spacing: .08em; }
-
-.jornada-sticky.is-detail .etapas, .jornada-sticky.is-detail .progress, .jornada-sticky.is-detail .jornada-head, .jornada-sticky.is-detail .scene-shade { opacity: 0; pointer-events: none; transition: opacity .4s; }
-.jornada-sticky.is-detail .detalhe-bg { opacity: 1; transition: opacity .8s var(--ease) .5s; }
-.jornada-sticky.is-detail .video-wrap { opacity: 1; pointer-events: auto; transition-delay: .75s; }
-.jornada-sticky.is-detail.is-detail-docked .video-wrap {
-  /* card widescreen 16:9 à direita, colado ao texto e à borda direita da tela */
-  inset: auto 0 auto auto; top: 50%; transform: translateY(-50%);
-  width: min(50vw, 900px); aspect-ratio: 16 / 9; height: auto;
-  border-radius: 18px 0 0 18px; overflow: hidden; box-shadow: var(--shadow);
-  transition: inset 1s var(--ease), width 1s var(--ease), transform 1s var(--ease), border-radius 1s var(--ease), top 1s var(--ease);
-}
-.jornada-sticky.is-detail.is-detail-docked .detalhe-texto { opacity: 1; pointer-events: auto; transform: translateY(-50%); transition: opacity .6s var(--ease) .9s, transform .6s var(--ease) .9s; }
-
-/* ---------- seções de conteúdo ---------- */
+/* ---------- blocos usados por várias seções ---------- */
 .wrap { max-width: 1200px; margin: 0 auto; padding: 0 clamp(20px, 5vw, 64px); }
 .wrap-estreito { max-width: 840px; }
 .sec-titulo { font-size: clamp(28px, 3.4vw, 44px); font-weight: 800; margin: 18px 0 40px; max-width: 720px; line-height: 1.08; }
 .sobe { opacity: 0; transform: translateY(22px); transition: opacity .7s var(--ease), transform .7s var(--ease); }
 .sobe.is-vis { opacity: 1; transform: none; }
+
+/* =====================================================================
+   SEÇÃO RESIDENCIAL — etapas da instalação e ficha técnica.
+   Seção comum, sem scroll travado e sem cena de imagens.
+   ===================================================================== */
+.etapasec { padding: clamp(80px, 10vw, 130px) 0; background: var(--bg); }
+
+.etapas-grid { list-style: none; padding: 0; margin: 48px 0 0;
+  display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; counter-reset: etapa; }
+.etapa-card { background: var(--bg-detalhe); border: 1px solid var(--border);
+  border-radius: 16px; padding: 26px 22px 24px; position: relative; }
+.etapa-card::before { content: ""; position: absolute; left: 22px; right: 22px; top: 0;
+  height: 3px; border-radius: 0 0 3px 3px; background: var(--accent); }
+.etapa-num { font-family: var(--font-title); font-size: 13px; font-weight: 800;
+  letter-spacing: .14em; color: var(--accent-strong); }
+.etapa-card h3 { font-family: var(--font-title); font-size: clamp(17px, 1.5vw, 20px);
+  font-weight: 700; margin: 10px 0 8px; line-height: 1.2; }
+.etapa-card p { font-size: 15px; color: var(--muted); line-height: 1.5; }
+
+.ficha-bloco { margin-top: clamp(48px, 6vw, 72px); display: grid;
+  grid-template-columns: 1fr 1fr; gap: clamp(28px, 4vw, 56px); align-items: start; }
+.ficha-texto h3 { font-size: clamp(24px, 2.6vw, 36px); font-weight: 800;
+  margin: 14px 0 16px; line-height: 1.1; }
+.ficha-texto .desc { color: var(--muted); font-size: 16px; margin-bottom: 28px; }
+
+.ficha { list-style: none; padding: 0; margin: 0; border-top: 1px solid var(--border); }
+.ficha li { display: grid; grid-template-columns: 150px 1fr; gap: 16px;
+  padding: 14px 0; border-bottom: 1px solid var(--border); align-items: baseline; }
+.ficha b { font-family: var(--font-title); font-size: 12px; letter-spacing: .1em;
+  text-transform: uppercase; color: var(--accent-strong); font-weight: 700; }
+.ficha span { font-size: 15px; color: var(--text); }
+
+@media (max-width: 960px) {
+  .etapas-grid { grid-template-columns: repeat(2, 1fr); gap: 14px; }
+  .ficha-bloco { grid-template-columns: 1fr; }
+}
+@media (max-width: 560px) {
+  .etapas-grid { grid-template-columns: 1fr; }
+  .ficha li { grid-template-columns: 1fr; gap: 4px; }
+}
 
 .prova { padding: clamp(80px, 10vw, 130px) 0; }
 .numeros { list-style: none; padding: 0; margin: 0 0 56px; display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 28px; }
@@ -339,21 +285,6 @@ button { font: inherit; cursor: pointer; }
   .menu-toggle { display: flex; margin-left: auto; }
   .btn-sim { display: none; }
   .footer-inner { grid-template-columns: 1fr; gap: 28px; }
-  .jornada { height: 400vh; }
-  .scene-shade { background: none; }
-  .etapas { right: 20px; max-width: none; bottom: 20px; gap: 0; padding: 16px 18px; }
-  /* no celular aparece uma etapa de cada vez, para não cobrir a foto */
-  .etapa { position: absolute; left: 18px; right: 18px; top: 16px; opacity: 0 !important; transform: translateY(14px) !important; }
-  .etapa.is-in.is-atual { opacity: 1 !important; transform: none !important; }
-  .etapas { min-height: 128px; position: absolute; }
-  .btn-saiba { margin: 0 0 0 22px; align-self: flex-start; }
-  .etapas { display: block; }
-  .etapas .btn-saiba { position: relative; margin-top: 96px; margin-left: 0; }
-  .etapa p { font-size: 17px; }
-  .progress { display: none; }
-  .detalhe-texto { width: auto; left: 20px; right: 20px; top: auto; bottom: 20px; transform: translateY(30px); max-height: 52vh; overflow: auto; }
-  .jornada-sticky.is-detail.is-detail-docked .detalhe-texto { transform: none; }
-  .jornada-sticky.is-detail.is-detail-docked .video-wrap { inset: calc(var(--header-h) + 12px) 0 auto 0; top: auto; transform: none; width: 100%; border-radius: 0; }
   .ficha li { grid-template-columns: 90px 1fr; font-size: 13px; }
   .modal-box { padding: 24px; width: 96vw; }
   .hero-img { border-radius: 20px; }
@@ -365,5 +296,5 @@ button { font: inherit; cursor: pointer; }
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto; }
   .panel-cells::after, .scroll-hint span, .loc-dot { animation: none; }
-  .etapa, .btn-saiba, .detalhe-bg, .detalhe-texto, .video-wrap { transition: none; }
+  .etapa-card { transition: none; }
 }
